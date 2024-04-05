@@ -35,9 +35,11 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'playground',
     'debug_toolbar',
-    'django.contrib.staticfiles',
+    'store',
+    'tags'
 ]
 
 MIDDLEWARE = [
