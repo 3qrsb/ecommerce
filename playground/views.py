@@ -35,5 +35,5 @@ def say_hello(request):
     # product = Product.objects.earlies('unit_price')
     # product = Product.objects.latest('unit_price')
     # limiting results
-    queryset = Product.objects.all()[:5]
+    # queryset = Product.objects.all()[:5]
     return render(request, 'hello.html', { 'name': 'Yers', 'products': list(queryset)})
