@@ -1,9 +1,10 @@
 from django.shortcuts import render
-from django.db.models import Q, F, Value
+from django.db.models import Q, F, Value, Func, ExpressionWrapper, DecimalField
+from django.db.models.functions import Concat
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from store.models import Product, OrderItem, Order, Customer
+from store.models import Product, OrderItem, Order, Customer, Collection
 
 
 
@@ -88,6 +89,32 @@ def say_hello(request):
     # queryset = Customer.objects.annotate(is_new=Value(True))
     # queryset = Customer.objects.annotate(new_id=F('id') + 1)
 
+    # calling database
+    # queryset = Customer.objects.annotate(full_name=Func(F('first_name'), Value(' '), F('last_name'), function = 'CONCAT'))
+    # queryset = Customer.objects.annotate(full_name=Concat('first_name', Value(' '), 'last_name'))
+    
+    # grouping data
+    # queryset = Customer.objects.annotate(orders_count=Count('order'))
+    
+    # expression wrapper
+    # discounted_price = ExpressionWrapper(
+    #     F('unit_price') * 0.8, output_field=DecimalField())
+    # queryset = Product.objects.annotate(
+    #     discounted_price = discounted_price
+    # )
+    # Customers with their last order ID
+    # queryset = Customer.objects.annotate(last_order_id = Max('order__id'))
+    # Collections and count of their products
+    # queryset = Collection.objects.annotate(products_count = Count('product'))
+    # Customers with more than 5 orders
+    # queryset = Customer.objects.annotate(orders_count = Count('order').filter(orders_count__gt=5))
+    # Customers and the total amount they’ve spent
+    # queryset = Customer.objects.annotate(total_spent=Sum(F('order__orderitem__unit_price') * F('order__orderitem__quantity')))
+    # Top 5 best-selling products and their total sales 
+    # queryset = Product.objects.annotate(total_sales = Sum(F('orderitem__unit_price') * F('orderitem__quantity'))).order_by('-total_sales')[:5]
+    
+    
+    
     
     
     # return render(request, 'hello.html', { 'name': 'Yers', 'result': result})
