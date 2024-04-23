@@ -2,10 +2,12 @@ from django.shortcuts import render
 from django.db.models import Q, F, Value, Func, ExpressionWrapper, DecimalField
 from django.db.models.functions import Concat
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
+from django.db import transaction, connection
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 from store.models import Product, OrderItem, Order, Customer, Collection
-
+from tags.models import TaggedItem
 
 
 def say_hello(request):
@@ -113,8 +115,100 @@ def say_hello(request):
     # Top 5 best-selling products and their total sales 
     # queryset = Product.objects.annotate(total_sales = Sum(F('orderitem__unit_price') * F('orderitem__quantity'))).order_by('-total_sales')[:5]
     
+    # querying generic relationships
+    # content_type = ContentType.objects.get_for_model(Product)
+    # queryset = TaggedItem.objects \
+    #     .select_related('tag') \
+    #     .filter(
+    #         content_type = content_type,
+    #         object_id = 1
+    # )
     
+    # custom managers
+    # TaggedItem.objects.get_tags_for(Product, 1)
+    # content_type = ContentType.objects.get_for_model(Product)
+    # queryset = TaggedItem.objects \
+    #     .select_related('tag') \
+    #     .filter(
+    #         content_type = content_type,
+    #         object_id = 1
+    # )
     
+    # queryset cache
+    # caching happens only if we evaluate the entire query set first
+    # queryset = Product.objects.all()
+    # list(queryset)
+    # queryset[0]
+    
+    # creating objects, insert a record in the database
+    # collection = Collection(title='Video Games')
+    
+    # collection = Collection()
+    # collection.title = 'Video Games' 
+    # collection.featured_product = Product(pk=1)
+    # collection.save()
+    # collection.id
+    
+    # key words are not updated
+    # collection = Collection.objects.create(name='Video Games', featured_product_id=1)
+    # collection.id
+    
+    # updating database
+    # collection = Collection.objects.get(pk=11)
+    # collection.featured_product = None
+    # collection.save()
+    # by default title = ''
+    # Collection.objects.filter(pk=11).update(featured_product=None)
+    
+    # deleting objects
+    # collection = Collection(pk=11)
+    # collection.delete()
+    # queryset = Collection.objects.filter(id__gt=5).delete()
+    
+    # some exercises
+    # creating a shopping cart with an item
+    # cart = Cart()
+    # cart.save()
+    # item1 = CartItem()
+    # item1.cart = cart
+    # item1.product_id = 1
+    # item1.quantity = 1
+    # item1.save()
+    # updating the quantity of an item
+    # item1 = CartItem.objects.get(pk=1)
+    # item1.quantity = 2
+    # item1.save()
+    # removing a cart, deleting a cart causes deletion of its items 
+    # due to cascading in the relationship between car and its items
+    # cart = cart(pk=1)
+    # cart.delete()
+    
+    # transactions
+    # with transaction.atomic():
+
+    #     order = Order()
+    #     order.customer_id = 1
+    #     order.save()
+
+    #     item = OrderItem()
+    #     item.order = order
+    #     item.product_id = -1
+    #     item.quantity = 1
+    #     item.unit_price = 10
+    #     item.save()
+
+    # raw sql queries, used for complex orm queries
+    # queryset = Product.objects.raw('SELECT * FROM store_product')
+    # queryset = Product.objects.raw('SELECT id, title FROM store_product')
+    # queryset = Product.objects.raw('SELECT id, title FROM store_product')
+    # cursor = connection.cursor()
+    # cursor.execute('INSERT')
+    # cursor.close()
+    
+    # with connection.cursor() as cursor:
+    #     cursor.execute()
+    # with connection.cursor() as cursor:
+    #     cursor.callproc('get_customers', [1, 2, 'a'])
     
     
     # return render(request, 'hello.html', { 'name': 'Yers', 'result': result})
