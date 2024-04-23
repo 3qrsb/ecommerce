@@ -1,8 +1,9 @@
 from django.shortcuts import render
-from django.db.models import Q, F
+from django.db.models import Q, F, Value
+from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from store.models import Product, OrderItem
+from store.models import Product, OrderItem, Order, Customer
 
 
 
@@ -58,5 +59,36 @@ def say_hello(request):
     # select_related (1) other end of the relationship has one instance
     # prefetch_related (n) has many objects
     # queryset = Product.objects.select_related('collection__someOtherField').all()
-    queryset = Product.objects.prefetch_related('promotions').select_related('collection').all()
-    return render(request, 'hello.html', { 'name': 'Yers', 'products': list(queryset)})
+    # queryset = Product.objects.prefetch_related('promotions').select_related('collection').all()
+    
+    # last 5 orders with their customer and items(incl product)
+    # queryset = Order.objects.select_related('customer').order_by('-placed_at')[:5]
+    # preload the items of these orders
+    # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set').order_by('-placed_at')[:5]
+    # span the relationship by adding two underscores
+    # queryset = Order.objects.select_related('customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
+    
+    # aggregating objects
+    # result = Product.objects.aggregate(Count('id'))
+    # change key word to 'count'
+    # result = Product.objects.aggregate(count = Count('id'))
+    # minimum price
+    # result = Product.objects.aggregate(count = Count('id'), min_price=Min('unit_price'))
+    # result = Product.objects.filter(collection__id=1).aggregate(count = Count('id'), min_price=Min('unit_price'))
+    # return all orders
+    # result = Order.objects.aggregate(Count('id'))
+    # return units of product 1 sold
+    # result = OrderItem.objects.filter(product__id=1).aggregate(units_sold=Sum('quantity'))
+    # return orders customer 1 placed
+    # result = Order.objects.filter(customer__id=1).aggregate(Count('id'))
+    # min, max, avg price of product in collection 1
+    # result = Product.objects.filter(collection__id=3).aggregate(min_price=Min('unit_price'), avg_price=Avg('unit_price'), max_price=Max('unit_price'))
+    
+    # annotating objects
+    # queryset = Customer.objects.annotate(is_new=Value(True))
+    # queryset = Customer.objects.annotate(new_id=F('id') + 1)
+
+    
+    
+    # return render(request, 'hello.html', { 'name': 'Yers', 'result': result})
+    return render(request, 'hello.html', { 'name': 'Yers', 'result': list(queryset)})
