@@ -5,7 +5,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from store.filters import ProductFilter
+from store.pagination import DefaultPagination
+from .filters import ProductFilter
 from .models import Collection, OrderItem, Product, Review
 from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
 
@@ -14,6 +15,7 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
+    pagination_class = DefaultPagination
     search_fields = ['title', 'description']
     ordering_fields = ['unit_price', 'inventory']
     
@@ -31,7 +33,9 @@ class CollectionViewSet(ModelViewSet):
     
 #need to fix
     def delete(self, request, pk):
-        collection = get_object_or_404(Product, pk=pk)
+        collection = get_object_or_404(Collection, pk=pk)
+        if collection.products.count() > 0:
+            return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
